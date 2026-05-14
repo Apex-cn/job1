@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>百化分·翻转记背 | 自动核对+完美适配手机</title>
+    <title>百化分·按键练习 | 弹窗核对 + 数字键盘</title>
     <style>
         * {
             margin: 0;
@@ -15,17 +14,16 @@
 
         body {
             background: #eef2ff;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Helvetica, 'Noto Sans', sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             padding: 16px 12px 32px;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 为3D翻转提供透视 */
             perspective: 1500px;
         }
 
-        /* 翻转容器 - 固定宽高自适应，不位移 */
+        /* 翻转容器 */
         .flip-container {
             width: 100%;
             max-width: 550px;
@@ -33,29 +31,23 @@
             position: relative;
             transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
             transform-style: preserve-3d;
-            /* 关键: 确保高度由内容撑开但背面绝对定位同步 */
         }
-
         .flip-container.flipped {
             transform: rotateY(180deg);
         }
 
-        /* 前后卡片共用样式 */
         .front-card, .back-card {
             background: white;
             border-radius: 44px 32px 44px 32px;
-            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2);
             overflow: hidden;
             backface-visibility: hidden;
             width: 100%;
-            /* 确保背面高度自适应内容 */
         }
-
         .front-card {
             transform: rotateY(0deg);
             padding: 20px 18px 28px;
         }
-
         .back-card {
             position: absolute;
             top: 0;
@@ -72,20 +64,19 @@
         /* 头部 */
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
         .header h1 {
-            font-size: 1.8rem;
+            font-size: 1.7rem;
             font-weight: 700;
             background: linear-gradient(135deg, #1e293b, #2d3a4f);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
-            letter-spacing: -0.3px;
         }
         .header p {
             color: #5b6e8c;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             margin-top: 6px;
             background: #eef2ff60;
             display: inline-block;
@@ -93,14 +84,14 @@
             border-radius: 40px;
         }
 
-        /* 统计卡片 — flex 换行紧密 */
+        /* 统计卡片 */
         .stats-row {
             display: flex;
             justify-content: space-between;
             background: #f8fafc;
             border-radius: 48px;
             padding: 10px 16px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             gap: 8px;
             box-shadow: inset 0 0 0 1px #e2e8f0;
         }
@@ -111,7 +102,6 @@
         .stat-label {
             font-size: 0.65rem;
             font-weight: 600;
-            text-transform: uppercase;
             color: #5b6e8c;
         }
         .stat-value {
@@ -128,10 +118,10 @@
         .quiz-card {
             background: linear-gradient(145deg, #ffffff, #fef9ef);
             border-radius: 48px;
-            padding: 28px 12px;
-            margin-bottom: 24px;
+            padding: 24px 12px;
+            margin-bottom: 20px;
             text-align: center;
-            box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(148, 163, 184, 0.2);
+            box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.1);
         }
         .question-label {
             font-size: 0.8rem;
@@ -141,21 +131,19 @@
             display: inline-block;
             padding: 4px 16px;
             border-radius: 60px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         .question-big {
-            font-size: 3rem;
+            font-size: 2.8rem;
             font-weight: 800;
             background: #0f172a;
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
-            margin-bottom: 12px;
-            word-break: break-word;
+            margin-bottom: 10px;
         }
         .question-big span {
-            font-size: 1.8rem;
-            font-weight: 500;
+            font-size: 1.6rem;
             color: #334155;
         }
         .hint-badge {
@@ -165,93 +153,103 @@
             border-radius: 40px;
             padding: 5px 12px;
             display: inline-flex;
-            align-items: center;
             gap: 5px;
         }
 
-        /* 输入区域 */
-        .answer-area {
+        /* 当前输入显示区 */
+        .input-display {
+            background: #f1f5f9;
+            border-radius: 60px;
+            padding: 14px 20px;
             margin-bottom: 20px;
-        }
-        .input-group {
-            display: flex;
-            gap: 12px;
-            background: #ffffff;
-            border-radius: 100px;
-            padding: 4px;
-            box-shadow: 0 0 0 1px #cbd5e1, 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .input-group:focus-within {
-            box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px #bfdbfe;
-        }
-        .answer-input {
-            flex: 1;
-            border: none;
-            padding: 14px 18px;
-            font-size: 1.1rem;
-            font-weight: 500;
-            background: transparent;
-            border-radius: 100px;
-            outline: none;
-            color: #0f172a;
-            font-family: monospace;
-        }
-        .answer-input::placeholder {
-            color: #94a3b8;
-            font-size: 0.9rem;
-        }
-
-        /* 反馈卡片 */
-        .feedback {
-            background: #f8fafd;
-            border-radius: 32px;
-            padding: 14px 16px;
-            margin-bottom: 24px;
             text-align: center;
-            font-weight: 500;
-            font-size: 0.9rem;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 6px;
-            border-left: 4px solid #cbd5e1;
+            border: 1px solid #e2e8f0;
         }
-        .feedback.correct {
-            background: #e6f9ed;
-            border-left-color: #2b9348;
-            color: #166534;
+        .input-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: monospace;
+            color: #0f172a;
+            letter-spacing: 1px;
+            word-break: break-all;
         }
-        .feedback.wrong {
-            background: #fff0f0;
-            border-left-color: #e11d48;
-            color: #b91c1c;
-        }
-        .feedback-neutral {
-            color: #475569;
+        .input-placeholder {
+            color: #94a3b8;
+            font-size: 1rem;
+            font-weight: 400;
         }
 
-        /* 按钮组 */
-        .action-buttons {
-            display: flex;
-            gap: 14px;
-            justify-content: center;
+        /* 数字键盘 grid 布局 */
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
             margin-bottom: 20px;
         }
-        .secondary-btn {
+        .num-btn {
             background: #ffffff;
             border: 1px solid #cbd5e1;
-            padding: 12px 0;
+            border-radius: 60px;
+            padding: 14px 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+            transition: 0.05s linear;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .num-btn:active {
+            background: #e2e8f0;
+            transform: scale(0.96);
+        }
+        .btn-del {
+            background: #fee2e2;
+            border-color: #fecaca;
+            color: #b91c1c;
+        }
+        .btn-clear {
+            background: #e6f0ff;
+            border-color: #bfdbfe;
+            color: #1e40af;
+        }
+        .btn-dot {
+            font-weight: 800;
+        }
+
+        /* 操作按钮组 */
+        .action-row {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .primary-btn {
+            flex: 1;
+            background: #1e293b;
+            border: none;
+            padding: 14px 0;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.1s;
+            text-align: center;
+        }
+        .primary-btn:active {
+            transform: scale(0.97);
+            background: #0f172a;
+        }
+        .secondary-btn {
+            flex: 1;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 14px 0;
             border-radius: 60px;
             font-weight: 600;
-            font-size: 0.95rem;
             color: #334155;
             cursor: pointer;
-            transition: 0.1s linear;
-            flex: 1;
             text-align: center;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.02);
         }
         .secondary-btn:active {
             background: #eef2ff;
@@ -269,9 +267,9 @@
             font-weight: 600;
             color: #334155;
             text-align: center;
-            margin-bottom: 8px;
             display: inline-block;
             width: auto;
+            margin-top: 6px;
         }
         footer {
             text-align: center;
@@ -282,7 +280,7 @@
             margin-top: 8px;
         }
 
-        /* 右下角翻转按钮 固定且不干扰滚动 */
+        /* 右下角翻转按钮 */
         .floating-view-btn {
             position: fixed;
             bottom: 24px;
@@ -297,7 +295,6 @@
             box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
             cursor: pointer;
             z-index: 1000;
-            transition: 0.2s ease;
             border: none;
             color: white;
             font-size: 1.7rem;
@@ -308,12 +305,12 @@
             transform: scale(0.92);
         }
 
-        /* 背面表格 — 完全可滑动 */
+        /* 背面数据表格 (可滑动) */
         .data-table-wrapper {
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            max-height: 65vh;
+            max-height: 60vh;
             margin-top: 16px;
             border-radius: 28px;
             background: #ffffff;
@@ -332,14 +329,12 @@
             padding: 12px 6px;
             font-weight: 600;
             z-index: 2;
-            font-size: 0.75rem;
         }
         .data-table td {
             padding: 10px 6px;
             border-bottom: 1px solid #e2e8f0;
             text-align: center;
             color: #1e293b;
-            font-weight: 500;
         }
         .data-table tr:nth-child(even) {
             background-color: #f8fafc;
@@ -349,7 +344,6 @@
             border-radius: 30px;
             padding: 3px 8px;
             font-size: 0.65rem;
-            font-weight: 500;
             display: inline-block;
         }
         .back-header {
@@ -358,116 +352,161 @@
             align-items: baseline;
             flex-wrap: wrap;
             margin-bottom: 8px;
-            padding-bottom: 6px;
             border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 6px;
         }
         .back-header h3 {
             font-size: 1.3rem;
             font-weight: 700;
             color: #0f172a;
         }
-        .close-hint {
-            font-size: 0.65rem;
-            color: #6c86a3;
-            background: #eef2ff;
-            padding: 4px 10px;
-            border-radius: 40px;
-        }
 
-        /* 手机极端小屏优化 */
         @media (max-width: 480px) {
-            body {
-                padding: 12px 10px 30px;
-            }
-            .front-card, .back-card {
-                padding: 16px 14px 24px;
-            }
-            .question-big {
-                font-size: 2.4rem;
-            }
-            .stat-value {
-                font-size: 1.3rem;
-            }
-            .floating-view-btn {
-                width: 50px;
-                height: 50px;
-                bottom: 18px;
-                right: 16px;
-                font-size: 1.5rem;
-            }
-            .data-table th, .data-table td {
-                padding: 8px 4px;
-                font-size: 0.7rem;
-            }
-            .action-buttons {
-                gap: 10px;
-            }
+            .front-card, .back-card { padding: 16px 14px 24px; }
+            .question-big { font-size: 2.2rem; }
+            .num-btn { padding: 12px 0; font-size: 1.3rem; }
+            .input-value { font-size: 1.5rem; }
+            .floating-view-btn { width: 50px; height: 50px; bottom: 18px; right: 16px; font-size: 1.5rem; }
         }
-
-        /* 防止 ios 下输入框缩放 */
-        input {
-            font-size: 16px;
+        /* 自定义悬浮结果窗口 */
+        .result-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(3px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
         }
+        .result-window {
+            background: white;
+            border-radius: 22px;
+            padding: 26px 20px 20px;
+            max-width: 310px;
+            width: 84%;
+            text-align: center;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+            animation: resultPopIn 0.22s ease-out;
+            border-top: 5px solid #e2e8f0;
+        }
+        .result-window.success { border-top-color: #16a34a; }
+        .result-window.error { border-top-color: #dc2626; }
+        .result-window.info { border-top-color: #2563eb; }
+        .result-window.warn { border-top-color: #f59e0b; }
+        @keyframes resultPopIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .result-icon { font-size: 2.5rem; margin-bottom: 6px; }
+        .result-title { font-size: 1.15rem; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+        .result-msg { font-size: 0.82rem; color: #5b6e8c; margin-bottom: 2px; }
+        .result-answer-box {
+            margin-top: 12px; text-align: left; background: #f8fafc;
+            border-radius: 12px; padding: 12px 14px; font-size: 0.9rem;
+        }
+        .result-answer-box .ans-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 5px 0;
+        }
+        .result-answer-box .ans-row + .ans-row { border-top: 1px dashed #e2e8f0; }
+        .result-answer-box .ans-label { color: #5b6e8c; font-weight: 600; font-size: 0.78rem; }
+        .result-answer-box .ans-val { color: #0f172a; font-weight: 700; font-size: 0.95rem; }
+        .result-answer-box .ans-val.user { color: #dc2626; }
+        .result-answer-box .ans-val.correct-ans { color: #16a34a; }
+        .result-btn {
+            margin-top: 16px; background: #1e293b; color: white; border: none;
+            padding: 10px 36px; border-radius: 40px; font-weight: 700; cursor: pointer;
+            font-size: 0.9rem; transition: 0.08s;
+        }
+        .result-btn:active { transform: scale(0.95); background: #0f172a; }
     </style>
 </head>
 <body>
 <div class="flip-container" id="flipContainer">
-    <!-- 正面练习面 -->
+    <!-- 正面答题面 -->
     <div class="front-card">
         <div class="header">
-            <h1>📖 百化分·翻转记</h1>
-            <p>输入答案 · 点击下一题自动核对</p>
+            <h1>🔢 百化分·按键练习</h1>
+            <p>数字键盘输入 · 弹窗核对答案</p>
         </div>
+        <!-- 统计卡片 -->
         <div class="stats-row">
             <div class="stat-item"><div class="stat-label">已练习</div><div class="stat-value" id="totalCount">0</div></div>
             <div class="stat-item"><div class="stat-label">正确</div><div class="stat-value" id="correctCount">0</div></div>
             <div class="stat-item"><div class="stat-label">正确率</div><div class="stat-value" id="accuracy">0<span class="stat-unit">%</span></div></div>
         </div>
+        <!-- 题目区 -->
         <div class="quiz-card">
             <div class="question-label">🎯 当前题目</div>
             <div class="question-big" id="questionText">1/10</div>
             <div class="hint-badge" id="groupHint">📂 分组 · 谁都会</div>
         </div>
-        <div class="answer-area">
-            <div class="input-group">
-                <input type="text" id="answerInput" class="answer-input" placeholder="输入百分数 (如 10% 或 10.5)" autocomplete="off" enterkeyhint="done">
-            </div>
+        <!-- 当前输入内容显示 -->
+        <div class="input-display">
+            <div id="currentInputDisplay" class="input-value">0</div>
+            <div style="font-size: 0.7rem; color:#5b6e8c; margin-top: 4px;">当前输入 (点击数字键)</div>
         </div>
-        <div class="feedback" id="feedbackMsg">
-            💡 输入百分数，点击「下一题」自动核对
+        <!-- 自定义数字键盘 -->
+        <div class="numpad" id="numpad">
+            <button class="num-btn" data-value="1">1</button>
+            <button class="num-btn" data-value="2">2</button>
+            <button class="num-btn" data-value="3">3</button>
+            <button class="num-btn" data-value="4">4</button>
+            <button class="num-btn" data-value="5">5</button>
+            <button class="num-btn" data-value="6">6</button>
+            <button class="num-btn" data-value="7">7</button>
+            <button class="num-btn" data-value="8">8</button>
+            <button class="num-btn" data-value="9">9</button>
+            <button class="num-btn btn-dot" data-value=".">.</button>
+            <button class="num-btn" data-value="0">0</button>
+            <button class="num-btn btn-del" id="delBtn">⌫</button>
+            <button class="num-btn" id="slashBtn" style="background:#fef9e7;">/</button>
+            <button class="num-btn" id="percentBtn" style="background:#e9f0ff;">%</button>
+            <button class="num-btn btn-clear" id="clearBtn" style="grid-column: span 2;">清空</button>
         </div>
-        <div class="action-buttons">
-            <button id="nextBtn" class="secondary-btn">🎲 下一题 (自动核对)</button>
-            <button id="resetStatsBtn" class="secondary-btn reset-btn">🔄 重置统计</button>
+        <!-- 操作按钮: 确定 + 下一题(新风格: 确定/跳过换题) -->
+        <div class="action-row">
+            <button id="confirmBtn" class="primary-btn">✓ 确定</button>
+            <button id="nextBtn" class="secondary-btn">🎲 跳过/换题</button>
+            <button id="resetStatsBtn" class="secondary-btn reset-btn">重置统计</button>
         </div>
-        <div style="text-align: center; margin-top: 6px;">
-            <span class="group-tag" id="groupMeta">📌 覆盖38组核心百化分</span>
+        <div style="text-align: center; margin-top: 4px;">
+            <span class="group-tag" id="groupMeta">📌 百化分38组核心数据</span>
         </div>
-        <footer>✔ 允许合理误差 (±0.02%) · 右下角查看完整表格</footer>
+        <footer>输入答案后按【确定】弹窗核对 · 自动记录正确率</footer>
     </div>
 
-    <!-- 背面数据表 (可滑动) -->
+    <!-- 背面速查表 -->
     <div class="back-card">
         <div class="back-header">
             <h3>📋 百化分速查表</h3>
-            <div class="close-hint">🔽 可滑动 · 再点右下角返回</div>
+            <div style="font-size:0.65rem; background:#eef2ff; padding:4px 10px; border-radius:40px;">可滑动</div>
         </div>
-        <div class="data-table-wrapper" id="dataTableWrapper">
-            <table class="data-table" id="fullDataTable">
+        <div class="data-table-wrapper">
+            <table class="data-table">
                 <thead><tr><th>分数</th><th>百分数</th><th>分组</th></tr></thead>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
-        <div style="margin-top: 14px; text-align: center; font-size: 0.7rem; color: #5b6e8c;">
-            ✅ 共 <span id="backTotalCount">0</span> 条核心数据
-        </div>
+        <div style="margin-top: 14px; text-align: center; font-size: 0.7rem; color: #5b6e8c;">✅ 共 <span id="backTotalCount">0</span> 条数据</div>
     </div>
 </div>
 
 <button class="floating-view-btn" id="flipViewBtn">📖</button>
 
+<!-- 悬浮结果窗口 -->
+<div class="result-overlay" id="resultOverlay">
+    <div class="result-window" id="resultWindow">
+        <div class="result-icon" id="resultIcon"></div>
+        <div class="result-title" id="resultTitle"></div>
+        <div class="result-msg" id="resultMsg"></div>
+        <div class="result-answer-box" id="resultAnswerBox"></div>
+    </div>
+</div>
+
 <script>
-    // ---------- 原始百化分数据 (完全保留用户提供的JSON，未修改任何数值) ----------
+    // ---------- 原始百化分数据 ----------
     const RAW_DATA = {
         "百化分数据": [
             {"分数":"1/40","百分数":"2.5%","分组":"谁都会"},
@@ -510,198 +549,325 @@
             {"分数":"1/3","百分数":"33.3%","分组":"谁都会"}
         ]
     };
-
     const questions = RAW_DATA["百化分数据"];
     const TOTAL_QS = questions.length;
 
-    // ---------- 工具函数：百分数规范化与容差比较 (合理误差 ±0.02) ----------
-    function normalizePercent(percentStr) {
-        let cleaned = percentStr.trim().toLowerCase();
-        if (!cleaned.endsWith('%')) return null;
-        let numPart = cleaned.slice(0, -1);
-        let num = parseFloat(numPart);
+    // 工具：百分数解析 + 容差0.02
+    function normalizePercent(pStr) {
+        let s = pStr.trim().toLowerCase();
+        if (!s.endsWith('%')) return null;
+        let num = parseFloat(s.slice(0, -1));
         return isNaN(num) ? null : num;
     }
-
     function parseUserInput(raw) {
-        let input = raw.trim();
-        if (input === "") return null;
-        let withPercent = input.endsWith('%') ? input : input + '%';
+        let v = raw.trim();
+        if (v === "") return null;
+        let withPercent = v.endsWith('%') ? v : v + '%';
         return normalizePercent(withPercent);
     }
-
-    // 允许 0.02% 的误差 (例如 6.25% 与 6.24% 或 6.26% 均可视为合理)
     function isAnswerCorrectWithTolerance(userRaw, correctPercentStr) {
-        const userNum = parseUserInput(userRaw);
-        if (userNum === null) return false;
-        const correctNum = normalizePercent(correctPercentStr);
-        if (correctNum === null) return false;
+        let userNum = parseUserInput(userRaw);
+        let correctNum = normalizePercent(correctPercentStr);
+        if (userNum === null || correctNum === null) return false;
         return Math.abs(userNum - correctNum) <= 0.02;
     }
 
-    // ---------- 全局状态 ----------
+    // ---------- 全局变量 ----------
     let currentQuestion = null;
-    let answered = false;         // 当前题目是否已经作答/核对过（避免重复统计）
-    let currentLock = false;      // 统计累加锁
-    let stats = {
-        totalAttempts: 0,
-        correctCount: 0
-    };
+    let currentQuestionType = 'f2p';  // 'f2p'=分数→百分数, 'p2f'=百分数→分数
+    let answeredForCurrent = false;
+    let currentLock = false;
+    let stats = { totalAttempts: 0, correctCount: 0 };
+    let currentInputStr = "";
 
     // DOM 元素
     const questionTextEl = document.getElementById('questionText');
     const groupHintEl = document.getElementById('groupHint');
-    const answerInput = document.getElementById('answerInput');
+    const currentInputDisplay = document.getElementById('currentInputDisplay');
+    const confirmBtn = document.getElementById('confirmBtn');
     const nextBtn = document.getElementById('nextBtn');
     const resetStatsBtn = document.getElementById('resetStatsBtn');
-    const feedbackMsgDiv = document.getElementById('feedbackMsg');
     const totalCountSpan = document.getElementById('totalCount');
     const correctCountSpan = document.getElementById('correctCount');
     const accuracySpan = document.getElementById('accuracy');
     const groupMetaSpan = document.getElementById('groupMeta');
-
-    // 翻转相关
     const flipContainer = document.getElementById('flipContainer');
     const flipViewBtn = document.getElementById('flipViewBtn');
     const tableBody = document.getElementById('tableBody');
     const backTotalCountSpan = document.getElementById('backTotalCount');
 
-    // 更新UI并存储
+    // 更新UI 统计 + localStorage
     function updateStatsUI() {
         totalCountSpan.innerText = stats.totalAttempts;
         correctCountSpan.innerText = stats.correctCount;
         let acc = stats.totalAttempts === 0 ? 0 : (stats.correctCount / stats.totalAttempts * 100);
         accuracySpan.innerText = Math.round(acc);
     }
-
-    function saveStats() {
-        localStorage.setItem('baifen_flip_stats', JSON.stringify(stats));
-    }
-
+    function saveStats() { localStorage.setItem('baifen_key_stats', JSON.stringify(stats)); }
     function loadStats() {
-        const saved = localStorage.getItem('baifen_flip_stats');
+        let saved = localStorage.getItem('baifen_key_stats');
         if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                if (typeof parsed.totalAttempts === 'number' && typeof parsed.correctCount === 'number') {
-                    stats = parsed;
-                }
-            } catch(e) {}
+            try { let p = JSON.parse(saved); if (typeof p.totalAttempts === 'number') stats = p; } catch(e) {}
         }
         updateStatsUI();
     }
-
     function resetStats() {
+        if (!confirm('确定要重置所有答题统计吗？此操作不可恢复。')) return;
         stats.totalAttempts = 0;
         stats.correctCount = 0;
         updateStatsUI();
         saveStats();
-        feedbackMsgDiv.innerHTML = '🗑️ 统计数据已重置，继续加油～';
-        feedbackMsgDiv.className = 'feedback feedback-neutral';
-        // 但不清除当前题目是否已作答状态，如果当前题目未作答，提示也不影响
-        if (!answered) {
-            setTimeout(() => {
-                if (!answered) feedbackMsgDiv.innerHTML = '💡 输入答案后点击下一题自动核对';
-            }, 1500);
+    }
+
+    // 更新显示区
+    function updateInputDisplay() {
+        if (currentInputStr === "") {
+            currentInputDisplay.innerText = "0";
+            currentInputDisplay.style.color = "#94a3b8";
+        } else {
+            currentInputDisplay.innerText = currentInputStr;
+            currentInputDisplay.style.color = "#0f172a";
         }
+    }
+    // 数字键盘追加字符 (处理小数点与百分号逻辑，百分号单独处理)
+    function appendToInput(value) {
+        if (value === '%') {
+            if (currentInputStr.includes('%')) return;
+            if (currentInputStr === "") currentInputStr = "0";
+            currentInputStr += '%';
+            updateInputDisplay();
+            return;
+        }
+        if (value === '/') {
+            if (currentInputStr.includes('/')) return;
+            if (currentInputStr === "" || currentInputStr.includes('%')) return;
+            currentInputStr += '/';
+            updateInputDisplay();
+            return;
+        }
+        if (value === '.') {
+            let lastSeg = currentInputStr.includes('/') ? currentInputStr.split('/').pop() : currentInputStr;
+            if (lastSeg.includes('.')) return;
+            if (currentInputStr === "") currentInputStr = "0";
+            currentInputStr += '.';
+            updateInputDisplay();
+            return;
+        }
+        if (currentInputStr.includes('%')) return;
+        if (currentInputStr === "0" && !currentInputStr.includes('.')) {
+            currentInputStr = value;
+        } else {
+            currentInputStr += value;
+        }
+        updateInputDisplay();
+    }
+    function deleteLastChar() {
+        if (currentInputStr === "") return;
+        currentInputStr = currentInputStr.slice(0, -1);
+        updateInputDisplay();
+    }
+    function clearInput() {
+        currentInputStr = "";
+        updateInputDisplay();
     }
 
     // 随机抽题
-    function pickRandomQuestion() {
-        const idx = Math.floor(Math.random() * TOTAL_QS);
-        return { ...questions[idx] };
-    }
+    function pickRandomQuestion() { return { ...questions[Math.floor(Math.random() * TOTAL_QS)] }; }
+    function randomQuestionType() { return Math.random() < 0.5 ? 'f2p' : 'p2f'; }
 
-    // 加载新题目 (保留统计，重置当前题目的锁定和作答标记)
+    // 加载新题目 (重置当前题目状态，不清除统计)
     function loadNewQuestion() {
         currentQuestion = pickRandomQuestion();
-        answered = false;
+        currentQuestionType = randomQuestionType();
+        answeredForCurrent = false;
         currentLock = false;
-        questionTextEl.innerHTML = `${currentQuestion.分数} <span>= ?</span>`;
-        groupHintEl.innerHTML = `📂 分组 · ${currentQuestion.分组}`;
-        answerInput.value = '';
-        // 清空反馈为中性
-        feedbackMsgDiv.innerHTML = '✏️ 输入百分数，点「下一题」自动核对并跳转';
-        feedbackMsgDiv.className = 'feedback feedback-neutral';
+        clearInput();
+        if (currentQuestionType === 'f2p') {
+            questionTextEl.innerHTML = `${currentQuestion.分数} <span>= ?</span>`;
+            groupHintEl.innerHTML = `📂 分组 · ${currentQuestion.分组} ｜ 输入百分数`;
+        } else {
+            questionTextEl.innerHTML = `${currentQuestion.百分数} <span>= ?</span>`;
+            groupHintEl.innerHTML = `📂 分组 · ${currentQuestion.分组} ｜ 输入分数`;
+        }
     }
 
-    // 核心: 核对当前输入的答案，更新统计和反馈 (不切换题目)
-    function checkCurrentAndUpdate() {
-        if (!currentQuestion) {
-            loadNewQuestion();
-            return false;
-        }
-        // 如果已经核对过本题，不再重复累加统计，但仍然显示之前的反馈（保持用户看到的结果）
-        if (answered) {
-            // 已经核对过，无需重复统计，但可以提示
-            return true;
+    // 解析分数为小数
+    function parseFractionToDecimal(fracStr) {
+        let parts = fracStr.trim().split('/');
+        if (parts.length !== 2) return null;
+        let num = parseFloat(parts[0]);
+        let den = parseFloat(parts[1]);
+        if (isNaN(num) || isNaN(den) || den === 0) return null;
+        return num / den;
+    }
+
+    // 核对分数类型答案 (p2f)
+    function checkFractionAnswer(userFrac, correctPercentStr) {
+        let userDec = parseFractionToDecimal(userFrac);
+        let correctNum = normalizePercent(correctPercentStr);
+        if (userDec === null || correctNum === null) return false;
+        return Math.abs(userDec - correctNum / 100) <= 0.001;
+    }
+
+    let resultTimer = null;
+
+    function showResultWindow(status, title, msg, userAns, correctAns, autoMs) {
+        if (resultTimer) clearTimeout(resultTimer);
+        let overlay = document.getElementById('resultOverlay');
+        let win = document.getElementById('resultWindow');
+        let iconEl = document.getElementById('resultIcon');
+        let titleEl = document.getElementById('resultTitle');
+        let msgEl = document.getElementById('resultMsg');
+        let boxEl = document.getElementById('resultAnswerBox');
+
+        win.className = 'result-window';
+        if (status === 'success') { win.classList.add('success'); iconEl.innerText = '✅'; }
+        else if (status === 'error') { win.classList.add('error'); iconEl.innerText = '❌'; }
+        else if (status === 'warn') { win.classList.add('warn'); iconEl.innerText = '⚠️'; }
+        else { win.classList.add('info'); iconEl.innerText = 'ℹ️'; }
+
+        titleEl.innerText = title;
+        msgEl.innerText = msg || '';
+
+        if (userAns || correctAns) {
+            boxEl.style.display = 'block';
+            let userCls = status === 'error' ? 'ans-val user' : 'ans-val';
+            let correctCls = status === 'error' ? 'ans-val correct-ans' : 'ans-val';
+            boxEl.innerHTML = `
+                <div class="ans-row"><span class="ans-label">你的答案</span><span class="${userCls}">${userAns || '（未输入）'}</span></div>
+                <div class="ans-row"><span class="ans-label">正确答案</span><span class="${correctCls}">${correctAns || ''}</span></div>
+            `;
+        } else {
+            boxEl.style.display = 'none';
         }
 
-        const userAnswer = answerInput.value.trim();
-        if (userAnswer === "") {
-            feedbackMsgDiv.innerHTML = '⚠️ 请输入百分数答案 (例如 10% 或 6.25)';
-            feedbackMsgDiv.className = 'feedback wrong';
-            return false;
+        overlay.style.display = 'flex';
+
+        let delay = autoMs || (status === 'success' ? 700 : 1300);
+        resultTimer = setTimeout(() => {
+            overlay.style.display = 'none';
+        }, delay);
+    }
+
+    function closeResultWindow() {
+        if (resultTimer) clearTimeout(resultTimer);
+        document.getElementById('resultOverlay').style.display = 'none';
+    }
+
+    // 核对逻辑
+    function checkAndShowDialog() {
+        if (!currentQuestion) { loadNewQuestion(); return; }
+        if (answeredForCurrent) {
+            showResultWindow('info', '已经核对过了', '本题已核对，试试下一题吧~', '', '');
+            return;
+        }
+        let userAnswerRaw = currentInputStr.trim();
+        if (userAnswerRaw === "") {
+            let hint = currentQuestionType === 'f2p' ? '请输入百分数 (如 6.25 或 10.5%)' : '请输入分数 (如 1/8)';
+            showResultWindow('warn', '请输入答案', hint, '', '');
+            return;
         }
 
-        const correctPercent = currentQuestion.百分数;
-        const isCorrect = isAnswerCorrectWithTolerance(userAnswer, correctPercent);
-        const correctValue = normalizePercent(correctPercent);
-        const userNum = parseUserInput(userAnswer);
-        const userDisplay = (userNum !== null ? userNum.toFixed(2).replace(/\.?0+$/, '') : userAnswer) + '%';
-        const correctDisplay = correctPercent;
+        let isCorrect = false;
+        let displayUser = userAnswerRaw;
+        let displayCorrect = '';
 
-        // 标记已经作答，防止重复统计
-        answered = true;
-        
-        if (isCorrect) {
+        if (currentQuestionType === 'f2p') {
+            let finalUserInput = userAnswerRaw.includes('%') ? userAnswerRaw : userAnswerRaw + '%';
+            displayUser = finalUserInput;
+            displayCorrect = currentQuestion.百分数;
+            isCorrect = isAnswerCorrectWithTolerance(finalUserInput, currentQuestion.百分数);
+        } else {
+            displayUser = userAnswerRaw;
+            displayCorrect = currentQuestion.分数;
+            isCorrect = checkFractionAnswer(userAnswerRaw, currentQuestion.百分数);
+        }
+
+        if (!answeredForCurrent) {
+            answeredForCurrent = true;
             if (!currentLock) {
                 stats.totalAttempts += 1;
-                stats.correctCount += 1;
+                if (isCorrect) stats.correctCount += 1;
                 currentLock = true;
                 updateStatsUI();
                 saveStats();
             }
-            feedbackMsgDiv.innerHTML = `✅ 正确！ ${currentQuestion.分数} = ${correctDisplay}<br>🎉 你的答案: ${userDisplay}`;
-            feedbackMsgDiv.className = 'feedback correct';
-            return true;
-        } else {
-            if (!currentLock) {
-                stats.totalAttempts += 1;
-                currentLock = true;
-                updateStatsUI();
-                saveStats();
-            }
-            feedbackMsgDiv.innerHTML = `❌ 错误！<br>📝 你的答案: ${userDisplay}<br>🔍 正确答案: ${correctDisplay} ( ${currentQuestion.分数} )<br>💡 允许小误差，继续加油～`;
-            feedbackMsgDiv.className = 'feedback wrong';
-            return false;
         }
+
+        showResultWindow(
+            isCorrect ? 'success' : 'error',
+            isCorrect ? '回答正确' : '回答错误',
+            isCorrect ? '很棒！继续巩固' : '记背一下，下次答对~',
+            displayUser,
+            displayCorrect
+        );
+
+        if (isCorrect) { fireConfetti(); }
+        setTimeout(() => { loadNewQuestion(); }, isCorrect ? 800 : 1500);
     }
 
-    // 下一题: 先核对当前题目（如果尚未核对），再加载新题目
-    function nextQuestionWithCheck() {
-        // 第一步：核对当前（如果还未核对过，会统计并且展示对错；如果已经核对过，不会重复统计但保留反馈）
-        if (!answered) {
-            checkCurrentAndUpdate();   // 核对并累加统计，answered变为true
-        } else {
-            // 已核对过，但为了防止无输入直接点下一题但还想显示上一题的反馈，保留现有反馈，直接换题
-            // 保持原样，然后换题
+    // ---------- 礼花特效 ----------
+    function fireConfetti() {
+        let canvas = document.createElement('canvas');
+        canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99999;';
+        document.body.appendChild(canvas);
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let ctx = canvas.getContext('2d');
+
+        let colors = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff922b','#845ef7','#ff6eb4','#00c9a7'];
+        let particles = [];
+        for (let i = 0; i < 100; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height * 0.3 - canvas.height * 0.1,
+                vx: (Math.random() - 0.5) * 12,
+                vy: Math.random() * 6 + 2,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                size: Math.random() * 8 + 4,
+                rot: Math.random() * 360,
+                rotV: (Math.random() - 0.5) * 15,
+                opacity: 1
+            });
         }
-        // 第二步：换新题（无论是否核对过，都刷新题目，重置 answered 和锁）
+
+        let start = performance.now();
+        function frame(now) {
+            let elapsed = now - start;
+            if (elapsed > 1400) { canvas.remove(); return; }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let fadeStart = 900;
+            for (let p of particles) {
+                p.x += p.vx;
+                p.vy += 0.12;
+                p.y += p.vy;
+                p.rot += p.rotV;
+                if (elapsed > fadeStart) p.opacity = Math.max(0, 1 - (elapsed - fadeStart) / 500);
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rot * Math.PI / 180);
+                ctx.globalAlpha = p.opacity;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+                ctx.restore();
+            }
+            requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+    }
+
+    // 跳过/换题: 不核对, 直接加载新题目(不清空统计，但重置锁)
+    function skipAndNext() {
+        // 如果当前已核对过但未跳题，还是可以换题，重置状态即可
         loadNewQuestion();
-        answerInput.focus();
-        // 对滚动调整，避免键盘遮挡
-        setTimeout(() => {
-            answerInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
+        // 可选提示: 轻提示无感
     }
 
-    // ---------- 渲染背面表格，确保可滑动且完整 ----------
-    function renderFullDataTable() {
-        if (!tableBody) return;
+    // ---------- 渲染背面表格 ----------
+    function renderBackTable() {
         tableBody.innerHTML = '';
         questions.forEach(item => {
-            const row = tableBody.insertRow();
+            let row = tableBody.insertRow();
             row.insertCell(0).innerText = item.分数;
             row.insertCell(1).innerText = item.百分数;
             row.insertCell(2).innerHTML = `<span class="group-badge">${item.分组}</span>`;
@@ -709,64 +875,60 @@
         backTotalCountSpan.innerText = questions.length;
     }
 
-    // 翻转功能: 修复手机上无法滚动的问题，翻转后确保背面容器获得滚动能力，并且不产生位移
+    // 翻转逻辑，修复手机滑动
     function toggleFlip() {
         flipContainer.classList.toggle('flipped');
-        // 当翻转到背面时，确保表格wrapper滚动可用，且不冲突
         if (flipContainer.classList.contains('flipped')) {
-            setTimeout(() => {
-                const wrapper = document.querySelector('.data-table-wrapper');
-                if (wrapper) {
-                    wrapper.scrollTop = 0;    // 回到顶部
-                    // 确保触摸滚动生效 (ios 需 -webkit-overflow-scrolling 已加)
-                }
-            }, 50);
+            setTimeout(() => { document.querySelector('.data-table-wrapper')?.scrollTo(0,0); }, 50);
         } else {
-            // 翻回正面时聚焦输入框
-            setTimeout(() => {
-                answerInput.focus();
-            }, 200);
+            setTimeout(() => { /* 无动作 */ }, 100);
         }
     }
 
-    // 初始化分组信息显示
-    function initMeta() {
-        const groups = new Set(questions.map(q => q.分组));
-        groupMetaSpan.innerHTML = `📌 覆盖${TOTAL_QS}道 · ${groups.size}个分组`;
-    }
-
-    // 防止翻转时页面位移、双指缩放不影响体验
-    function initApp() {
+    // 初始化
+    function init() {
         loadStats();
-        initMeta();
-        renderFullDataTable();
+        renderBackTable();
+        groupMetaSpan.innerText = `📌 覆盖${TOTAL_QS}道 · 百化分核心表`;
         // 随机第一题
-        const first = pickRandomQuestion();
-        currentQuestion = first;
-        answered = false;
+        currentQuestion = pickRandomQuestion();
+        currentQuestionType = randomQuestionType();
+        answeredForCurrent = false;
         currentLock = false;
-        questionTextEl.innerHTML = `${currentQuestion.分数} <span>= ?</span>`;
-        groupHintEl.innerHTML = `📂 分组 · ${currentQuestion.分组}`;
-        answerInput.value = '';
-        feedbackMsgDiv.innerHTML = '💡 输入百分数，点击「下一题」自动核对并换题';
-        feedbackMsgDiv.className = 'feedback feedback-neutral';
+        currentInputStr = "";
+        updateInputDisplay();
+        if (currentQuestionType === 'f2p') {
+            questionTextEl.innerHTML = `${currentQuestion.分数} <span>= ?</span>`;
+            groupHintEl.innerHTML = `📂 分组 · ${currentQuestion.分组} ｜ 输入百分数`;
+        } else {
+            questionTextEl.innerHTML = `${currentQuestion.百分数} <span>= ?</span>`;
+            groupHintEl.innerHTML = `📂 分组 · ${currentQuestion.分组} ｜ 输入分数`;
+        }
 
-        // 事件绑定
-        nextBtn.addEventListener('click', nextQuestionWithCheck);
+        // 绑定数字键盘事件
+        document.querySelectorAll('.num-btn[data-value]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                let val = btn.getAttribute('data-value');
+                if (val) appendToInput(val);
+            });
+        });
+        document.getElementById('delBtn').addEventListener('click', () => deleteLastChar());
+        document.getElementById('clearBtn').addEventListener('click', () => clearInput());
+        document.getElementById('percentBtn').addEventListener('click', () => appendToInput('%'));
+        document.getElementById('slashBtn').addEventListener('click', () => appendToInput('/'));
+
+        confirmBtn.addEventListener('click', checkAndShowDialog);
+        nextBtn.addEventListener('click', skipAndNext);
         resetStatsBtn.addEventListener('click', resetStats);
         flipViewBtn.addEventListener('click', toggleFlip);
-        // 输入框按回车键同样触发下一题（同时自动核对）
-        answerInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                nextQuestionWithCheck();
-            }
+
+        // 点击遮罩关闭悬浮窗
+        document.getElementById('resultOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeResultWindow();
         });
-
-        answerInput.focus();
     }
-
-    initApp();
+    init();
 </script>
 </body>
 </html>
