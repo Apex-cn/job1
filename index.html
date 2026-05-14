@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>百化分·按键练习 | 弹窗核对 + 数字键盘</title>
     <style>
         * {
@@ -10,6 +10,16 @@
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        html {
+            overflow: hidden;
+            height: 100%;
+            position: fixed;
+            width: 100%;
         }
 
         body {
@@ -17,10 +27,20 @@
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             padding: 16px 12px 32px;
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             justify-content: center;
             align-items: center;
             perspective: 1500px;
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: auto;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            touch-action: pan-x pan-y;
         }
 
         /* 翻转容器 */
@@ -283,7 +303,7 @@
         /* 右下角翻转按钮 */
         .floating-view-btn {
             position: fixed;
-            bottom: 24px;
+            bottom: calc(28px + env(safe-area-inset-bottom, 0px));
             right: 20px;
             background: #1e293b;
             width: 56px;
@@ -366,7 +386,7 @@
             .question-big { font-size: 2.2rem; }
             .num-btn { padding: 12px 0; font-size: 1.3rem; }
             .input-value { font-size: 1.5rem; }
-            .floating-view-btn { width: 50px; height: 50px; bottom: 18px; right: 16px; font-size: 1.5rem; }
+            .floating-view-btn { width: 50px; height: 50px; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); right: 16px; font-size: 1.5rem; }
         }
         /* 自定义悬浮结果窗口 */
         .result-overlay {
@@ -753,6 +773,12 @@
         if (resultTimer) clearTimeout(resultTimer);
         document.getElementById('resultOverlay').style.display = 'none';
     }
+
+    // 阻止悬浮窗上的触摸事件穿透
+    document.addEventListener('DOMContentLoaded', function() {
+        let overlay = document.getElementById('resultOverlay');
+        overlay.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+    });
 
     // 核对逻辑
     function checkAndShowDialog() {
