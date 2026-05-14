@@ -1,0 +1,772 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>百化分·翻转记背 | 自动核对+完美适配手机</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #eef2ff;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Helvetica, 'Noto Sans', sans-serif;
+            padding: 16px 12px 32px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 为3D翻转提供透视 */
+            perspective: 1500px;
+        }
+
+        /* 翻转容器 - 固定宽高自适应，不位移 */
+        .flip-container {
+            width: 100%;
+            max-width: 550px;
+            margin: 0 auto;
+            position: relative;
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-style: preserve-3d;
+            /* 关键: 确保高度由内容撑开但背面绝对定位同步 */
+        }
+
+        .flip-container.flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* 前后卡片共用样式 */
+        .front-card, .back-card {
+            background: white;
+            border-radius: 44px 32px 44px 32px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            backface-visibility: hidden;
+            width: 100%;
+            /* 确保背面高度自适应内容 */
+        }
+
+        .front-card {
+            transform: rotateY(0deg);
+            padding: 20px 18px 28px;
+        }
+
+        .back-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: rotateY(180deg);
+            height: auto;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 18px 28px;
+            background: white;
+        }
+
+        /* 头部 */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e293b, #2d3a4f);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+        .header p {
+            color: #5b6e8c;
+            font-size: 0.8rem;
+            margin-top: 6px;
+            background: #eef2ff60;
+            display: inline-block;
+            padding: 3px 14px;
+            border-radius: 40px;
+        }
+
+        /* 统计卡片 — flex 换行紧密 */
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            background: #f8fafc;
+            border-radius: 48px;
+            padding: 10px 16px;
+            margin-bottom: 24px;
+            gap: 8px;
+            box-shadow: inset 0 0 0 1px #e2e8f0;
+        }
+        .stat-item {
+            flex: 1;
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #5b6e8c;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+        .stat-unit {
+            font-size: 0.7rem;
+        }
+
+        /* 题目卡片 */
+        .quiz-card {
+            background: linear-gradient(145deg, #ffffff, #fef9ef);
+            border-radius: 48px;
+            padding: 28px 12px;
+            margin-bottom: 24px;
+            text-align: center;
+            box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(148, 163, 184, 0.2);
+        }
+        .question-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #5470b0;
+            background: #eef2ff;
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 60px;
+            margin-bottom: 20px;
+        }
+        .question-big {
+            font-size: 3rem;
+            font-weight: 800;
+            background: #0f172a;
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 12px;
+            word-break: break-word;
+        }
+        .question-big span {
+            font-size: 1.8rem;
+            font-weight: 500;
+            color: #334155;
+        }
+        .hint-badge {
+            font-size: 0.7rem;
+            color: #6c86a3;
+            background: #f1f5f9;
+            border-radius: 40px;
+            padding: 5px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* 输入区域 */
+        .answer-area {
+            margin-bottom: 20px;
+        }
+        .input-group {
+            display: flex;
+            gap: 12px;
+            background: #ffffff;
+            border-radius: 100px;
+            padding: 4px;
+            box-shadow: 0 0 0 1px #cbd5e1, 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .input-group:focus-within {
+            box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px #bfdbfe;
+        }
+        .answer-input {
+            flex: 1;
+            border: none;
+            padding: 14px 18px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            background: transparent;
+            border-radius: 100px;
+            outline: none;
+            color: #0f172a;
+            font-family: monospace;
+        }
+        .answer-input::placeholder {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* 反馈卡片 */
+        .feedback {
+            background: #f8fafd;
+            border-radius: 32px;
+            padding: 14px 16px;
+            margin-bottom: 24px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.9rem;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 6px;
+            border-left: 4px solid #cbd5e1;
+        }
+        .feedback.correct {
+            background: #e6f9ed;
+            border-left-color: #2b9348;
+            color: #166534;
+        }
+        .feedback.wrong {
+            background: #fff0f0;
+            border-left-color: #e11d48;
+            color: #b91c1c;
+        }
+        .feedback-neutral {
+            color: #475569;
+        }
+
+        /* 按钮组 */
+        .action-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .secondary-btn {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 12px 0;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #334155;
+            cursor: pointer;
+            transition: 0.1s linear;
+            flex: 1;
+            text-align: center;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.02);
+        }
+        .secondary-btn:active {
+            background: #eef2ff;
+            transform: scale(0.97);
+        }
+        .reset-btn {
+            background: #f1f5f9;
+        }
+
+        .group-tag {
+            background: #eef2ff;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #334155;
+            text-align: center;
+            margin-bottom: 8px;
+            display: inline-block;
+            width: auto;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.6rem;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 16px;
+            margin-top: 8px;
+        }
+
+        /* 右下角翻转按钮 固定且不干扰滚动 */
+        .floating-view-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 20px;
+            background: #1e293b;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 1000;
+            transition: 0.2s ease;
+            border: none;
+            color: white;
+            font-size: 1.7rem;
+            background-color: #0f172ae6;
+            backdrop-filter: blur(4px);
+        }
+        .floating-view-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* 背面表格 — 完全可滑动 */
+        .data-table-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            max-height: 65vh;
+            margin-top: 16px;
+            border-radius: 28px;
+            background: #ffffff;
+            border: 1px solid #eef2ff;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+        .data-table th {
+            position: sticky;
+            top: 0;
+            background: #1e293b;
+            color: white;
+            padding: 12px 6px;
+            font-weight: 600;
+            z-index: 2;
+            font-size: 0.75rem;
+        }
+        .data-table td {
+            padding: 10px 6px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+            color: #1e293b;
+            font-weight: 500;
+        }
+        .data-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .group-badge {
+            background: #e2e8f0;
+            border-radius: 30px;
+            padding: 3px 8px;
+            font-size: 0.65rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .back-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .back-header h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .close-hint {
+            font-size: 0.65rem;
+            color: #6c86a3;
+            background: #eef2ff;
+            padding: 4px 10px;
+            border-radius: 40px;
+        }
+
+        /* 手机极端小屏优化 */
+        @media (max-width: 480px) {
+            body {
+                padding: 12px 10px 30px;
+            }
+            .front-card, .back-card {
+                padding: 16px 14px 24px;
+            }
+            .question-big {
+                font-size: 2.4rem;
+            }
+            .stat-value {
+                font-size: 1.3rem;
+            }
+            .floating-view-btn {
+                width: 50px;
+                height: 50px;
+                bottom: 18px;
+                right: 16px;
+                font-size: 1.5rem;
+            }
+            .data-table th, .data-table td {
+                padding: 8px 4px;
+                font-size: 0.7rem;
+            }
+            .action-buttons {
+                gap: 10px;
+            }
+        }
+
+        /* 防止 ios 下输入框缩放 */
+        input {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="flip-container" id="flipContainer">
+    <!-- 正面练习面 -->
+    <div class="front-card">
+        <div class="header">
+            <h1>📖 百化分·翻转记</h1>
+            <p>输入答案 · 点击下一题自动核对</p>
+        </div>
+        <div class="stats-row">
+            <div class="stat-item"><div class="stat-label">已练习</div><div class="stat-value" id="totalCount">0</div></div>
+            <div class="stat-item"><div class="stat-label">正确</div><div class="stat-value" id="correctCount">0</div></div>
+            <div class="stat-item"><div class="stat-label">正确率</div><div class="stat-value" id="accuracy">0<span class="stat-unit">%</span></div></div>
+        </div>
+        <div class="quiz-card">
+            <div class="question-label">🎯 当前题目</div>
+            <div class="question-big" id="questionText">1/10</div>
+            <div class="hint-badge" id="groupHint">📂 分组 · 谁都会</div>
+        </div>
+        <div class="answer-area">
+            <div class="input-group">
+                <input type="text" id="answerInput" class="answer-input" placeholder="输入百分数 (如 10% 或 10.5)" autocomplete="off" enterkeyhint="done">
+            </div>
+        </div>
+        <div class="feedback" id="feedbackMsg">
+            💡 输入百分数，点击「下一题」自动核对
+        </div>
+        <div class="action-buttons">
+            <button id="nextBtn" class="secondary-btn">🎲 下一题 (自动核对)</button>
+            <button id="resetStatsBtn" class="secondary-btn reset-btn">🔄 重置统计</button>
+        </div>
+        <div style="text-align: center; margin-top: 6px;">
+            <span class="group-tag" id="groupMeta">📌 覆盖38组核心百化分</span>
+        </div>
+        <footer>✔ 允许合理误差 (±0.02%) · 右下角查看完整表格</footer>
+    </div>
+
+    <!-- 背面数据表 (可滑动) -->
+    <div class="back-card">
+        <div class="back-header">
+            <h3>📋 百化分速查表</h3>
+            <div class="close-hint">🔽 可滑动 · 再点右下角返回</div>
+        </div>
+        <div class="data-table-wrapper" id="dataTableWrapper">
+            <table class="data-table" id="fullDataTable">
+                <thead><tr><th>分数</th><th>百分数</th><th>分组</th></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+        <div style="margin-top: 14px; text-align: center; font-size: 0.7rem; color: #5b6e8c;">
+            ✅ 共 <span id="backTotalCount">0</span> 条核心数据
+        </div>
+    </div>
+</div>
+
+<button class="floating-view-btn" id="flipViewBtn">📖</button>
+
+<script>
+    // ---------- 原始百化分数据 (完全保留用户提供的JSON，未修改任何数值) ----------
+    const RAW_DATA = {
+        "百化分数据": [
+            {"分数":"1/40","百分数":"2.5%","分组":"谁都会"},
+            {"分数":"1/30","百分数":"3.3%","分组":"谁都会"},
+            {"分数":"1/20","百分数":"5%","分组":"谁都会"},
+            {"分数":"1/19","百分数":"5.3%","分组":"等差数列"},
+            {"分数":"1/18","百分数":"5.6%","分组":"等差数列"},
+            {"分数":"1/17","百分数":"5.9%","分组":"等差数列"},
+            {"分数":"1/16.5","百分数":"6%","分组":"母子互换"},
+            {"分数":"1/16","百分数":"6.25%","分组":"母子互换"},
+            {"分数":"1/15.5","百分数":"6.5%","分组":"母子互换"},
+            {"分数":"1/15","百分数":"6.7%","分组":"母子互换"},
+            {"分数":"1/14.5","百分数":"6.9%","分组":"母子互换"},
+            {"分数":"1/14","百分数":"7.1%","分组":"母子互换"},
+            {"分数":"1/13.5","百分数":"7.4%","分组":"母子互换"},
+            {"分数":"1/13","百分数":"7.7%","分组":"加和20"},
+            {"分数":"1/12.5","百分数":"8%","分组":"加和20"},
+            {"分数":"1/12","百分数":"8.3%","分组":"加和20"},
+            {"分数":"1/11","百分数":"9.1%","分组":"加和20"},
+            {"分数":"1/10.5","百分数":"9.5%","分组":"加和20"},
+            {"分数":"1/10","百分数":"10%","分组":"加和20"},
+            {"分数":"1/9.5","百分数":"10.5%","分组":"加和20"},
+            {"分数":"1/9","百分数":"11.1%","分组":"加和20"},
+            {"分数":"1/8.5","百分数":"11.8%","分组":"加和20"},
+            {"分数":"1/8","百分数":"12.5%","分组":"加和20"},
+            {"分数":"1/7.7","百分数":"13%","分组":"加和20"},
+            {"分数":"1/7.5","百分数":"13.3%","分组":"加和20"},
+            {"分数":"1/7","百分数":"14.3%","分组":"母子互换"},
+            {"分数":"1/6.7","百分数":"15%","分组":"母子互换"},
+            {"分数":"1/6.5","百分数":"15.4%","分组":"母子互换"},
+            {"分数":"1/6","百分数":"16.7%","分组":"母子互换"},
+            {"分数":"1/5.9","百分数":"17%","分组":"等差数列"},
+            {"分数":"1/5.6","百分数":"18%","分组":"等差数列"},
+            {"分数":"1/5.5","百分数":"18.2%","分组":"等差数列"},
+            {"分数":"1/5.3","百分数":"19%","分组":"等差数列"},
+            {"分数":"1/5","百分数":"20%","分组":"谁都会"},
+            {"分数":"1/4.5","百分数":"22.2%","分组":"谁都会"},
+            {"分数":"1/4","百分数":"25%","分组":"谁都会"},
+            {"分数":"1/3.5","百分数":"28.6%","分组":"谁都会"},
+            {"分数":"1/3","百分数":"33.3%","分组":"谁都会"}
+        ]
+    };
+
+    const questions = RAW_DATA["百化分数据"];
+    const TOTAL_QS = questions.length;
+
+    // ---------- 工具函数：百分数规范化与容差比较 (合理误差 ±0.02) ----------
+    function normalizePercent(percentStr) {
+        let cleaned = percentStr.trim().toLowerCase();
+        if (!cleaned.endsWith('%')) return null;
+        let numPart = cleaned.slice(0, -1);
+        let num = parseFloat(numPart);
+        return isNaN(num) ? null : num;
+    }
+
+    function parseUserInput(raw) {
+        let input = raw.trim();
+        if (input === "") return null;
+        let withPercent = input.endsWith('%') ? input : input + '%';
+        return normalizePercent(withPercent);
+    }
+
+    // 允许 0.02% 的误差 (例如 6.25% 与 6.24% 或 6.26% 均可视为合理)
+    function isAnswerCorrectWithTolerance(userRaw, correctPercentStr) {
+        const userNum = parseUserInput(userRaw);
+        if (userNum === null) return false;
+        const correctNum = normalizePercent(correctPercentStr);
+        if (correctNum === null) return false;
+        return Math.abs(userNum - correctNum) <= 0.02;
+    }
+
+    // ---------- 全局状态 ----------
+    let currentQuestion = null;
+    let answered = false;         // 当前题目是否已经作答/核对过（避免重复统计）
+    let currentLock = false;      // 统计累加锁
+    let stats = {
+        totalAttempts: 0,
+        correctCount: 0
+    };
+
+    // DOM 元素
+    const questionTextEl = document.getElementById('questionText');
+    const groupHintEl = document.getElementById('groupHint');
+    const answerInput = document.getElementById('answerInput');
+    const nextBtn = document.getElementById('nextBtn');
+    const resetStatsBtn = document.getElementById('resetStatsBtn');
+    const feedbackMsgDiv = document.getElementById('feedbackMsg');
+    const totalCountSpan = document.getElementById('totalCount');
+    const correctCountSpan = document.getElementById('correctCount');
+    const accuracySpan = document.getElementById('accuracy');
+    const groupMetaSpan = document.getElementById('groupMeta');
+
+    // 翻转相关
+    const flipContainer = document.getElementById('flipContainer');
+    const flipViewBtn = document.getElementById('flipViewBtn');
+    const tableBody = document.getElementById('tableBody');
+    const backTotalCountSpan = document.getElementById('backTotalCount');
+
+    // 更新UI并存储
+    function updateStatsUI() {
+        totalCountSpan.innerText = stats.totalAttempts;
+        correctCountSpan.innerText = stats.correctCount;
+        let acc = stats.totalAttempts === 0 ? 0 : (stats.correctCount / stats.totalAttempts * 100);
+        accuracySpan.innerText = Math.round(acc);
+    }
+
+    function saveStats() {
+        localStorage.setItem('baifen_flip_stats', JSON.stringify(stats));
+    }
+
+    function loadStats() {
+        const saved = localStorage.getItem('baifen_flip_stats');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (typeof parsed.totalAttempts === 'number' && typeof parsed.correctCount === 'number') {
+                    stats = parsed;
+                }
+            } catch(e) {}
+        }
+        updateStatsUI();
+    }
+
+    function resetStats() {
+        stats.totalAttempts = 0;
+        stats.correctCount = 0;
+        updateStatsUI();
+        saveStats();
+        feedbackMsgDiv.innerHTML = '🗑️ 统计数据已重置，继续加油～';
+        feedbackMsgDiv.className = 'feedback feedback-neutral';
+        // 但不清除当前题目是否已作答状态，如果当前题目未作答，提示也不影响
+        if (!answered) {
+            setTimeout(() => {
+                if (!answered) feedbackMsgDiv.innerHTML = '💡 输入答案后点击下一题自动核对';
+            }, 1500);
+        }
+    }
+
+    // 随机抽题
+    function pickRandomQuestion() {
+        const idx = Math.floor(Math.random() * TOTAL_QS);
+        return { ...questions[idx] };
+    }
+
+    // 加载新题目 (保留统计，重置当前题目的锁定和作答标记)
+    function loadNewQuestion() {
+        currentQuestion = pickRandomQuestion();
+        answered = false;
+        currentLock = false;
+        questionTextEl.innerHTML = `${currentQuestion.分数} <span>= ?</span>`;
+        groupHintEl.innerHTML = `📂 分组 · ${currentQuestion.分组}`;
+        answerInput.value = '';
+        // 清空反馈为中性
+        feedbackMsgDiv.innerHTML = '✏️ 输入百分数，点「下一题」自动核对并跳转';
+        feedbackMsgDiv.className = 'feedback feedback-neutral';
+    }
+
+    // 核心: 核对当前输入的答案，更新统计和反馈 (不切换题目)
+    function checkCurrentAndUpdate() {
+        if (!currentQuestion) {
+            loadNewQuestion();
+            return false;
+        }
+        // 如果已经核对过本题，不再重复累加统计，但仍然显示之前的反馈（保持用户看到的结果）
+        if (answered) {
+            // 已经核对过，无需重复统计，但可以提示
+            return true;
+        }
+
+        const userAnswer = answerInput.value.trim();
+        if (userAnswer === "") {
+            feedbackMsgDiv.innerHTML = '⚠️ 请输入百分数答案 (例如 10% 或 6.25)';
+            feedbackMsgDiv.className = 'feedback wrong';
+            return false;
+        }
+
+        const correctPercent = currentQuestion.百分数;
+        const isCorrect = isAnswerCorrectWithTolerance(userAnswer, correctPercent);
+        const correctValue = normalizePercent(correctPercent);
+        const userNum = parseUserInput(userAnswer);
+        const userDisplay = (userNum !== null ? userNum.toFixed(2).replace(/\.?0+$/, '') : userAnswer) + '%';
+        const correctDisplay = correctPercent;
+
+        // 标记已经作答，防止重复统计
+        answered = true;
+        
+        if (isCorrect) {
+            if (!currentLock) {
+                stats.totalAttempts += 1;
+                stats.correctCount += 1;
+                currentLock = true;
+                updateStatsUI();
+                saveStats();
+            }
+            feedbackMsgDiv.innerHTML = `✅ 正确！ ${currentQuestion.分数} = ${correctDisplay}<br>🎉 你的答案: ${userDisplay}`;
+            feedbackMsgDiv.className = 'feedback correct';
+            return true;
+        } else {
+            if (!currentLock) {
+                stats.totalAttempts += 1;
+                currentLock = true;
+                updateStatsUI();
+                saveStats();
+            }
+            feedbackMsgDiv.innerHTML = `❌ 错误！<br>📝 你的答案: ${userDisplay}<br>🔍 正确答案: ${correctDisplay} ( ${currentQuestion.分数} )<br>💡 允许小误差，继续加油～`;
+            feedbackMsgDiv.className = 'feedback wrong';
+            return false;
+        }
+    }
+
+    // 下一题: 先核对当前题目（如果尚未核对），再加载新题目
+    function nextQuestionWithCheck() {
+        // 第一步：核对当前（如果还未核对过，会统计并且展示对错；如果已经核对过，不会重复统计但保留反馈）
+        if (!answered) {
+            checkCurrentAndUpdate();   // 核对并累加统计，answered变为true
+        } else {
+            // 已核对过，但为了防止无输入直接点下一题但还想显示上一题的反馈，保留现有反馈，直接换题
+            // 保持原样，然后换题
+        }
+        // 第二步：换新题（无论是否核对过，都刷新题目，重置 answered 和锁）
+        loadNewQuestion();
+        answerInput.focus();
+        // 对滚动调整，避免键盘遮挡
+        setTimeout(() => {
+            answerInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    }
+
+    // ---------- 渲染背面表格，确保可滑动且完整 ----------
+    function renderFullDataTable() {
+        if (!tableBody) return;
+        tableBody.innerHTML = '';
+        questions.forEach(item => {
+            const row = tableBody.insertRow();
+            row.insertCell(0).innerText = item.分数;
+            row.insertCell(1).innerText = item.百分数;
+            row.insertCell(2).innerHTML = `<span class="group-badge">${item.分组}</span>`;
+        });
+        backTotalCountSpan.innerText = questions.length;
+    }
+
+    // 翻转功能: 修复手机上无法滚动的问题，翻转后确保背面容器获得滚动能力，并且不产生位移
+    function toggleFlip() {
+        flipContainer.classList.toggle('flipped');
+        // 当翻转到背面时，确保表格wrapper滚动可用，且不冲突
+        if (flipContainer.classList.contains('flipped')) {
+            setTimeout(() => {
+                const wrapper = document.querySelector('.data-table-wrapper');
+                if (wrapper) {
+                    wrapper.scrollTop = 0;    // 回到顶部
+                    // 确保触摸滚动生效 (ios 需 -webkit-overflow-scrolling 已加)
+                }
+            }, 50);
+        } else {
+            // 翻回正面时聚焦输入框
+            setTimeout(() => {
+                answerInput.focus();
+            }, 200);
+        }
+    }
+
+    // 初始化分组信息显示
+    function initMeta() {
+        const groups = new Set(questions.map(q => q.分组));
+        groupMetaSpan.innerHTML = `📌 覆盖${TOTAL_QS}道 · ${groups.size}个分组`;
+    }
+
+    // 防止翻转时页面位移、双指缩放不影响体验
+    function initApp() {
+        loadStats();
+        initMeta();
+        renderFullDataTable();
+        // 随机第一题
+        const first = pickRandomQuestion();
+        currentQuestion = first;
+        answered = false;
+        currentLock = false;
+        questionTextEl.innerHTML = `${currentQuestion.分数} <span>= ?</span>`;
+        groupHintEl.innerHTML = `📂 分组 · ${currentQuestion.分组}`;
+        answerInput.value = '';
+        feedbackMsgDiv.innerHTML = '💡 输入百分数，点击「下一题」自动核对并换题';
+        feedbackMsgDiv.className = 'feedback feedback-neutral';
+
+        // 事件绑定
+        nextBtn.addEventListener('click', nextQuestionWithCheck);
+        resetStatsBtn.addEventListener('click', resetStats);
+        flipViewBtn.addEventListener('click', toggleFlip);
+        // 输入框按回车键同样触发下一题（同时自动核对）
+        answerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                nextQuestionWithCheck();
+            }
+        });
+
+        answerInput.focus();
+    }
+
+    initApp();
+</script>
+</body>
+</html>
