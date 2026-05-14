@@ -207,21 +207,14 @@
             border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 4px;
         }
 
-        /* ── 中上翻转按钮 ── */
-        .floating-view-btn {
-            position: fixed;
-            top: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1e293b; width: 38px; height: 38px;
-            border-radius: 50%; display: flex; align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.18);
-            cursor: pointer; z-index: 1000; border: none;
-            color: white; font-size: 1.1rem;
-            background-color: #0f172ae6; backdrop-filter: blur(4px);
+        /* ── 翻转按钮（操作区绿色） ── */
+        .flip-btn {
+            background: #16a34a; border: none;
+            padding: 12px 0; border-radius: 50px; font-weight: 700;
+            font-size: 0.9rem; color: white; cursor: pointer; text-align: center;
+            transition: 0.08s;
         }
-        .floating-view-btn:active { transform: translateX(-50%) scale(0.9); }
+        .flip-btn:active { transform: scale(0.96); background: #15803d; }
 
         /* ── 背面表格 ── */
         .data-table-wrapper {
@@ -344,7 +337,6 @@
             .num-btn { padding: 10px 0; font-size: 1.2rem; }
             .option-btn { font-size: 0.7rem; padding: 10px 8px; min-height: 60px; }
             .section { padding: 0 8px 16px; }
-            .floating-view-btn { width: 34px; height: 34px; font-size: 1rem; top: 6px; }
         }
     </style>
 </head>
@@ -388,6 +380,7 @@
                     <button id="bfConfirm" class="primary-btn">✓ 确定</button>
                     <button id="bfSkip" class="secondary-btn">🎲 换题</button>
                     <button id="bfReset" class="secondary-btn reset-btn">重置</button>
+                    <button id="bfFlipBtn" class="flip-btn">📖 速查表</button>
                 </div>
                 <div style="text-align:center;"><span class="group-tag" id="bfMeta">📌 百化分38组核心数据</span></div>
                 <footer>输入答案后按确定 · 答对自动下一题</footer>
@@ -407,7 +400,6 @@
                 <div style="margin-top:8px; text-align:center; font-size:0.65rem; color:#5b6e8c;">✅ 共 <span id="bfBackTotal">0</span> 条数据</div>
             </div>
         </div>
-        <button class="floating-view-btn" id="bfFlipBtn">📖</button>
     </div>
 
     <!-- ========== 词语记忆 Section ========== -->
@@ -464,11 +456,6 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         currentSection = sec;
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById('section-' + sec).classList.add('active');
-        if (sec === 'baifen') {
-            document.getElementById('bfFlipBtn').style.display = '';
-        } else {
-            document.getElementById('bfFlipBtn').style.display = 'none';
-        }
     });
 });
 
